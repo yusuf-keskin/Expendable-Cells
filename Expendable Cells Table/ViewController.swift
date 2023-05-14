@@ -13,7 +13,7 @@ class ViewController: UIViewController {
     
     var table : UITableView = {
         let table = UITableView()
-        table.register(MyCellTableViewCell.self, forCellReuseIdentifier: MyCellTableViewCell.identifier)
+        table.register(ExpandableCell.self, forCellReuseIdentifier: ExpandableCell.identifier)
         table.translatesAutoresizingMaskIntoConstraints = false
         return table
     }()
@@ -40,7 +40,7 @@ class ViewController: UIViewController {
         }
         
         table.rowHeight = UITableView.automaticDimension
-        table.estimatedRowHeight = 20
+        table.estimatedRowHeight = 40
     }
     
 
@@ -68,11 +68,17 @@ extension ViewController : UITableViewDataSource {
     }
     
     public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: MyCellTableViewCell.identifier) as? MyCellTableViewCell else {
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: ExpandableCell.identifier) as? ExpandableCell else {
          
             return UITableViewCell() }
         let data = texts[indexPath.row]
         cell.setupView(text: data)
+
+        cell.cellHeightChanged = {
+            DispatchQueue.main.async {
+                self.table.performBatchUpdates(nil, completion: nil)
+            }
+        }
         return cell
     }
 }

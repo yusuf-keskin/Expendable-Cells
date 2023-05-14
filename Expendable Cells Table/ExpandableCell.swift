@@ -11,37 +11,122 @@ class ExpandableCell: UITableViewCell {
     
     static let identifier = "Cell"
     
+    var cellHeightChanged: (()->())?
+    
+    let stackView : UIStackView = {
+        let stackView = UIStackView()
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        stackView.distribution = .fillProportionally
+        stackView.alignment = .fill
+        stackView.axis = .vertical
+        stackView.spacing = 2
+        stackView.isLayoutMarginsRelativeArrangement = true
+        stackView.directionalLayoutMargins = NSDirectionalEdgeInsets(top: 2, leading: 4, bottom: 2, trailing: 4)
+        return stackView
+    }()
+    
+    let horizontalStack : UIStackView = {
+        let stackView = UIStackView()
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        stackView.distribution = .fillEqually
+        //stackView.alignment = .fill
+        stackView.axis = .horizontal
+        stackView.spacing = 2
+        stackView.isLayoutMarginsRelativeArrangement = true
+        stackView.directionalLayoutMargins = NSDirectionalEdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16)
+        return stackView
+    }()
+     
     var label : UILabel = {
         let label = UILabel()
-        label.font = UIFont(name: "Avenir", size: 12)
+        label.font = UIFont(name: "Avenir", size: 18)
         label.textColor =  .black
         label.translatesAutoresizingMaskIntoConstraints = false
         label.text = "Hey"
+        label.isHidden = true
+        return label
+    }()
+    
+    var headerLbl : UILabel = {
+        let label = UILabel()
+        label.font = UIFont(name: "Avenir", size: 18)
+        label.textColor =  .black
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.text = "Lorep Ipsum"
         return label
     }()
     
     var btn : UIButton = {
         let btn = UIButton()
         btn.setTitle("Clik Me", for: .normal)
+        btn.titleLabel?.font = UIFont(name: "Avenir", size: 18)
         btn.translatesAutoresizingMaskIntoConstraints = false
         btn.backgroundColor = .gray
+        btn.addTarget(nil, action: #selector(toggle), for: .touchUpInside)
         return btn
     }()
     
     override func awakeFromNib() {
         self.contentView.sizeToFit()
         super.awakeFromNib()
+        
+    }
+    
+    @objc func toggle(){
+        DispatchQueue.main.async {
+            if self.label.isHidden {
+                self.label.isHidden = false
+            } else {
+                self.label.isHidden = true
+            }
+        }
+        cellHeightChanged?()
+    }
+    
 
+    
+    func addSubviews(){
+        contentView.addSubview(stackView)
+        stackView.addArrangedSubview(horizontalStack)
+        horizontalStack.addArrangedSubview(headerLbl)
+        horizontalStack.addArrangedSubview(btn)
+        stackView.addArrangedSubview(label)
+    }
+    
+    func setConstraints(){
+        stackView.topAnchor.constraint(equalTo: contentView.topAnchor).isActive = true
+        stackView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor).isActive = true
+        stackView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor).isActive = true
+        stackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor).isActive = true
+
+        btn.layer.cornerRadius = 7
+
+        headerLbl.numberOfLines = 0
+        headerLbl.sizeToFit()
+
+        label.sizeToFit()
+        label.numberOfLines = 0
+        label.trailingAnchor.constraint(equalTo: stackView.trailingAnchor, constant: -12).isActive = true
+        label.leadingAnchor.constraint(equalTo: stackView.leadingAnchor, constant: 12).isActive = true
     }
     
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
-
+        addSubviews()
+        setConstraints()
     }
+    
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        contentView.addSubview(label)
-//        contentView.addSubview(btn)
+        addSubviews()
+        setConstraints()
+        reloadInputViews()
+    }
+   
+    required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+        addSubviews()
+        setConstraints()
     }
     
     func setupView(text: String){
@@ -49,29 +134,13 @@ class ExpandableCell: UITableViewCell {
             self.label.text = text
             print(text)
         }
-        
-    }
-    
-    required init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
     }
     
     override func layoutSubviews() {
         super.layoutSubviews()
 
         
-        label.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 5).isActive = true
-        label.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor, constant: 5).isActive = true
-        label.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor, constant: -5).isActive = true
-        label.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor, constant: -5).isActive = true
-        label.heightAnchor.constraint(greaterThanOrEqualToConstant: 10).isActive = true
-        label.numberOfLines = 0
-        label.sizeToFit()
 
-//        btn.trailingAnchor.constraint(equalTo: self.layoutMarginsGuide.trailingAnchor, constant: -20).isActive = true
-//        btn.bottomAnchor.constraint(equalTo: self.layoutMarginsGuide.bottomAnchor, constant: -10).isActive = true
-//        btn.heightAnchor.constraint(equalToConstant: 30).isActive = true
-//        btn.widthAnchor.constraint(equalToConstant: 100).isActive = true
         
     }
     
